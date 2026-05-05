@@ -10,7 +10,11 @@ import { countSelectedStudents, filterStudents } from './utils/students';
 
 const THEME_STORAGE_KEY = 'student-search-theme';
 
-function getInitialTheme() {
+function getPreferredTheme() {
+  if (typeof window === 'undefined') {
+    return 'light';
+  }
+
   const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
 
   if (storedTheme === 'dark' || storedTheme === 'light') {
@@ -21,7 +25,8 @@ function getInitialTheme() {
 }
 
 export default function App() {
-  const [theme, setTheme] = useState(getInitialTheme);
+  const [theme, setTheme] = useState('light');
+  const [hasResolvedTheme, setHasResolvedTheme] = useState(false);
   const [students, setStudents] = useState([]);
   const [exportColumns, setExportColumns] = useState([]);
   const [headerRows, setHeaderRows] = useState([]);
@@ -38,9 +43,17 @@ export default function App() {
   const debouncedQuery = useDebouncedValue(query, 300);
 
   useEffect(() => {
+    setTheme(getPreferredTheme());
+    setHasResolvedTheme(true);
+  }, []);
+
+  useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-  }, [theme]);
+
+    if (hasResolvedTheme) {
+      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    }
+  }, [hasResolvedTheme, theme]);
 
   useEffect(() => {
     const worker = new Worker(new URL('./workers/excelParser.worker.js', import.meta.url), {
