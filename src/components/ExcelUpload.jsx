@@ -47,8 +47,7 @@ export default function ExcelUpload({ onFileSelect, isLoading, fileName, error }
   );
 
   return (
-    <div className="glass-panel surface-ring relative overflow-hidden rounded-[32px] p-6 sm:p-7">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-teal-200/30 dark:from-white/5 dark:to-teal-400/10" />
+    <div className="card relative overflow-hidden p-6 sm:p-7">
       <div className="relative">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
@@ -57,7 +56,7 @@ export default function ExcelUpload({ onFileSelect, isLoading, fileName, error }
             </p>
             <h2 className="mt-2 text-2xl font-bold text-ink">Upload intersection sheet</h2>
           </div>
-          <div className="rounded-full bg-accentSoft px-3 py-1 text-xs font-semibold text-accent">
+          <div className="rounded-[10px] bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
             {isLoading ? 'Parsing' : 'Ready'}
           </div>
         </div>
@@ -69,13 +68,13 @@ export default function ExcelUpload({ onFileSelect, isLoading, fileName, error }
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           className={[
-            'rounded-[28px] border border-dashed px-5 py-10 text-center transition duration-200',
+            'rounded-[10px] border border-dashed px-5 py-10 text-center transition duration-200',
             isDragging
-              ? 'border-accent bg-accentSoft/80'
-              : 'border-line bg-white/55 dark:bg-slate-950/35',
+              ? 'border-teal-400 bg-teal-50'
+              : 'border-line bg-slate-50',
           ].join(' ')}
         >
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-950 text-lg font-bold text-white dark:bg-teal-400 dark:text-slate-950">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[10px] bg-teal-700 text-lg font-bold text-white">
             XL
           </div>
           <p className="mt-5 text-lg font-semibold text-ink">
@@ -91,7 +90,7 @@ export default function ExcelUpload({ onFileSelect, isLoading, fileName, error }
             >
               {fileName ? 'Upload another sheet' : 'Choose workbook'}
             </button>
-            <span className="rounded-full border border-line px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-muted">
+            <span className="rounded-[10px] border border-line px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-muted">
               .xlsx / .xls
             </span>
           </div>
@@ -105,7 +104,7 @@ export default function ExcelUpload({ onFileSelect, isLoading, fileName, error }
         </div>
 
         {error ? (
-          <p className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-200">
+          <p className="mt-4 rounded-[10px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
             {error}
           </p>
         ) : null}

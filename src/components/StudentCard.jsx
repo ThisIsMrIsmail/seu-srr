@@ -22,7 +22,7 @@ function HighlightedText({ text, query, arabic = false }) {
         part.toLowerCase() === lowerQuery ? (
           <mark
             key={`${part}-${index}`}
-            className="rounded-md bg-amber-200 px-1 text-slate-900 dark:bg-amber-300 dark:text-slate-950"
+            className="rounded bg-amber-200 px-1 text-slate-900"
           >
             {part}
           </mark>
@@ -37,12 +37,12 @@ function HighlightedText({ text, query, arabic = false }) {
 function StatusBadge({ status }) {
   const tone =
     status === 'Match'
-      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-200'
+      ? 'bg-emerald-100 text-emerald-700'
       : status === 'Conflict'
-        ? 'bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-200'
-        : 'bg-slate-100 text-slate-700 dark:bg-slate-800/80 dark:text-slate-200';
+        ? 'bg-amber-100 text-amber-700'
+        : 'bg-slate-100 text-slate-600';
 
-  return <span className={['rounded-full px-4 py-2 text-sm font-semibold', tone].join(' ')}>{status}</span>;
+  return <span className={['rounded-[10px] px-4 py-2 text-sm font-semibold', tone].join(' ')}>{status}</span>;
 }
 
 export default function StudentCard({
@@ -56,7 +56,7 @@ export default function StudentCard({
 }) {
   if (!student) {
     return (
-      <article ref={panelRef} className="glass-panel surface-ring rounded-[32px] p-8" tabIndex={-1}>
+      <article ref={panelRef} className="card p-8" tabIndex={-1}>
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted">Student Detail</p>
         <h2 className="mt-3 text-2xl font-bold text-ink">Select a student to review courses</h2>
         <p className="mt-3 max-w-2xl text-base leading-7 text-muted">
@@ -69,7 +69,7 @@ export default function StudentCard({
   const manualKeySet = new Set(reconciliation?.manualSelection.selectedCourseKeys ?? []);
 
   return (
-    <article ref={panelRef} className="glass-panel surface-ring rounded-[32px] p-6 sm:p-7" tabIndex={-1}>
+    <article ref={panelRef} className="card p-6 sm:p-7" tabIndex={-1}>
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted">Student Detail</p>
@@ -99,31 +99,31 @@ export default function StudentCard({
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-[24px] bg-white/70 p-4 dark:bg-slate-950/35">
+        <div className="rounded-[10px] bg-slate-50 p-4">
           <p className="text-sm text-muted">System courses</p>
           <p className="mt-2 text-2xl font-bold text-ink">{reconciliation?.systemCourses.length ?? 0}</p>
         </div>
-        <div className="rounded-[24px] bg-white/70 p-4 dark:bg-slate-950/35">
+        <div className="rounded-[10px] bg-slate-50 p-4">
           <p className="text-sm text-muted">Paper courses</p>
           <p className="mt-2 text-2xl font-bold text-ink">{reconciliation?.manualCourses.length ?? 0}</p>
         </div>
-        <div className="rounded-[24px] bg-white/70 p-4 dark:bg-slate-950/35">
+        <div className="rounded-[10px] bg-slate-50 p-4">
           <p className="text-sm text-muted">Missing in system</p>
           <p className="mt-2 text-2xl font-bold text-ink">{reconciliation?.missingInSystem.length ?? 0}</p>
         </div>
-        <div className="rounded-[24px] bg-white/70 p-4 dark:bg-slate-950/35">
+        <div className="rounded-[10px] bg-slate-50 p-4">
           <p className="text-sm text-muted">Missing on paper</p>
           <p className="mt-2 text-2xl font-bold text-ink">{reconciliation?.missingOnPaper.length ?? 0}</p>
         </div>
       </div>
 
       <div className="mt-6 grid gap-4 xl:grid-cols-2">
-        <div className="rounded-[26px] border border-line bg-white/70 p-4 dark:bg-slate-950/35">
+        <div className="rounded-[10px] border border-line bg-white p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">Paper only</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {reconciliation?.missingInSystem.length ? (
               reconciliation.missingInSystem.map((course) => (
-                <span key={course} className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-400/15 dark:text-amber-200">
+                <span key={course} className="rounded-[10px] bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
                   {course}
                 </span>
               ))
@@ -133,12 +133,12 @@ export default function StudentCard({
           </div>
         </div>
 
-        <div className="rounded-[26px] border border-line bg-white/70 p-4 dark:bg-slate-950/35">
+        <div className="rounded-[10px] border border-line bg-white p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">System only</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {reconciliation?.missingOnPaper.length ? (
               reconciliation.missingOnPaper.map((course) => (
-                <span key={course} className="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700 dark:bg-rose-400/15 dark:text-rose-200">
+                <span key={course} className="rounded-[10px] bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">
                   {course}
                 </span>
               ))
@@ -149,7 +149,7 @@ export default function StudentCard({
         </div>
       </div>
 
-      <div className="mt-6 rounded-[28px] border border-line bg-white/70 p-4 dark:bg-slate-950/35">
+      <div className="mt-6 rounded-[10px] border border-line bg-white p-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
@@ -159,7 +159,7 @@ export default function StudentCard({
               Use Tab to move through courses and Space to toggle the focused checkbox.
             </p>
           </div>
-          <span className="rounded-full bg-accentSoft px-3 py-1 text-xs font-semibold text-accent">
+          <span className="rounded-[10px] bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
             {subjectColumns.length} courses this semester
           </span>
         </div>
@@ -175,14 +175,14 @@ export default function StudentCard({
               <label
                 key={subject.key}
                 className={[
-                  'flex cursor-pointer flex-col gap-4 rounded-[24px] border p-4 transition duration-200 sm:flex-row sm:items-center sm:justify-between',
+                  'flex cursor-pointer flex-col gap-4 rounded-[10px] border p-4 transition duration-150 sm:flex-row sm:items-center sm:justify-between',
                   isPaperOnly
-                    ? 'border-amber-300 bg-amber-50/80 dark:border-amber-400/20 dark:bg-amber-400/10'
+                    ? 'border-amber-300 bg-amber-50'
                     : isSystemOnly
-                      ? 'border-rose-300 bg-rose-50/80 dark:border-rose-400/20 dark:bg-rose-400/10'
+                      ? 'border-rose-300 bg-rose-50'
                       : isManualSelected && isSystemSelected
-                        ? 'border-emerald-300 bg-emerald-50/70 dark:border-emerald-400/20 dark:bg-emerald-400/10'
-                        : 'border-line bg-white/80 dark:bg-slate-950/25',
+                        ? 'border-emerald-300 bg-emerald-50'
+                        : 'border-line bg-white',
                 ].join(' ')}
               >
                 <div className="flex items-start gap-4">
@@ -209,20 +209,20 @@ export default function StudentCard({
                 <div className="flex flex-wrap gap-2 text-xs font-semibold">
                   <span
                     className={[
-                      'rounded-full px-3 py-1',
+                      'rounded-[10px] px-3 py-1',
                       isSystemSelected
-                        ? 'bg-slate-950 text-white dark:bg-teal-400 dark:text-slate-950'
-                        : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200',
+                        ? 'bg-teal-700 text-white'
+                        : 'bg-slate-100 text-slate-600',
                     ].join(' ')}
                   >
                     {isSystemSelected ? 'In system' : 'Not in system'}
                   </span>
                   <span
                     className={[
-                      'rounded-full px-3 py-1',
+                      'rounded-[10px] px-3 py-1',
                       isManualSelected
-                        ? 'bg-accentSoft text-accent'
-                        : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200',
+                        ? 'bg-teal-50 text-teal-700'
+                        : 'bg-slate-100 text-slate-600',
                     ].join(' ')}
                   >
                     {isManualSelected ? 'Checked on paper' : 'Not checked'}

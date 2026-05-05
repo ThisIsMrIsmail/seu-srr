@@ -23,7 +23,7 @@ export default function WorkspaceSidebar({
   persistenceError,
 }) {
   return (
-    <div className="glass-panel surface-ring rounded-[32px] p-5 sm:p-6">
+    <div className="card p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted">
@@ -31,7 +31,7 @@ export default function WorkspaceSidebar({
           </p>
           <h2 className="mt-2 text-2xl font-bold text-ink">Saved semesters</h2>
         </div>
-        <div className="rounded-full bg-accentSoft px-3 py-1 text-xs font-semibold text-accent">
+        <div className="rounded-[10px] bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
           {workspaces.length}
         </div>
       </div>
@@ -41,20 +41,20 @@ export default function WorkspaceSidebar({
       </p>
 
       {persistenceError ? (
-        <p className="mt-4 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200">
+        <p className="mt-4 rounded-[10px] border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           {persistenceError}
         </p>
       ) : null}
 
       <div className="mt-5 space-y-3">
         {!isHydrated ? (
-          <div className="rounded-[26px] border border-line bg-white/65 px-4 py-5 text-sm text-muted dark:bg-slate-950/35">
+          <div className="rounded-[10px] border border-line bg-white px-4 py-5 text-sm text-muted">
             Restoring saved workspaces...
           </div>
         ) : null}
 
         {isHydrated && !workspaces.length ? (
-          <div className="rounded-[26px] border border-dashed border-line bg-white/65 px-4 py-5 text-sm leading-6 text-muted dark:bg-slate-950/35">
+          <div className="rounded-[10px] border border-dashed border-line bg-white px-4 py-5 text-sm leading-6 text-muted">
             Upload the semester intersection workbook to create the first workspace.
           </div>
         ) : null}
@@ -71,10 +71,10 @@ export default function WorkspaceSidebar({
             <div
               key={workspace.id}
               className={[
-                'rounded-[26px] border p-4 transition duration-200',
+                'rounded-[10px] border p-4 transition duration-150',
                 isActive
-                  ? 'border-accent bg-accentSoft/80'
-                  : 'border-line bg-white/70 hover:bg-white/90 dark:bg-slate-950/35 dark:hover:bg-slate-950/45',
+                  ? 'border-teal-300 bg-teal-50'
+                  : 'border-line bg-white hover:bg-slate-50',
               ].join(' ')}
             >
               <div className="flex items-start gap-3">
@@ -90,7 +90,7 @@ export default function WorkspaceSidebar({
                 <button
                   type="button"
                   onClick={() => onRemoveWorkspace(workspace.id)}
-                  className="rounded-full border border-line px-3 py-1 text-xs font-semibold text-muted transition hover:bg-white/80 dark:hover:bg-slate-900/60"
+                  className="rounded-[10px] border border-line px-3 py-1.5 text-xs font-semibold text-muted transition hover:bg-slate-50"
                   aria-label={`Remove ${workspace.name}`}
                 >
                   Remove
@@ -98,13 +98,13 @@ export default function WorkspaceSidebar({
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
-                <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-900/70 dark:text-slate-100">
+                <span className="rounded-[10px] bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
                   {summary.totalStudents} students
                 </span>
-                <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-900/70 dark:text-slate-100">
+                <span className="rounded-[10px] bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
                   {summary.reviewedCount} reviewed
                 </span>
-                <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-900/70 dark:text-slate-100">
+                <span className="rounded-[10px] bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
                   {summary.conflictCount} conflicts
                 </span>
               </div>

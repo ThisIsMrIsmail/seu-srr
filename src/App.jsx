@@ -4,29 +4,12 @@ import SearchInput from './components/SearchInput';
 import SelectionControls from './components/SelectionControls';
 import StudentCard from './components/StudentCard';
 import StudentList from './components/StudentList';
-import ThemeToggle from './components/ThemeToggle';
 import WorkspaceSidebar from './components/WorkspaceSidebar';
 import { WorkspaceProvider, useWorkspaceContext } from './context/WorkspaceContext';
 import useDebouncedValue from './hooks/useDebouncedValue';
 import { exportReconciliationReport } from './utils/excel';
 import { buildStudentReconciliation, buildWorkspaceSummary } from './utils/reconciliation';
 import { filterStudents } from './utils/students';
-
-const THEME_STORAGE_KEY = 'student-search-theme';
-
-function getPreferredTheme() {
-  if (typeof window === 'undefined') {
-    return 'light';
-  }
-
-  const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-
-  if (storedTheme === 'dark' || storedTheme === 'light') {
-    return storedTheme;
-  }
-
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
 
 function deriveWorkspaceName(fileName) {
   const normalized = String(fileName || '')
@@ -48,7 +31,7 @@ function createEmptySummary() {
   };
 }
 
-function AppShell({ theme, onToggleTheme }) {
+function AppShell() {
   const { activeWorkspace, workspaces, actions, isHydrated, persistenceError } =
     useWorkspaceContext();
   const [error, setError] = useState('');
@@ -427,32 +410,22 @@ function AppShell({ theme, onToggleTheme }) {
   const currentFileName = pendingFileName || activeWorkspace?.fileName || '';
 
   return (
-    <main className="relative mx-auto max-w-[1500px] px-4 pb-14 pt-6 sm:px-6 lg:px-8">
-      <div className="absolute inset-x-0 top-0 -z-10 h-72 bg-gradient-to-b from-white/35 to-transparent dark:from-white/5" />
-
-      <header className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-muted">
-            Student Registration Reconciliation
-          </p>
-          <h1 className="mt-2 text-4xl font-black tracking-tight text-ink sm:text-5xl">
-            Review paper forms against the system workbook.
-          </h1>
-          <p className="mt-3 max-w-4xl text-base leading-7 text-muted sm:text-lg">
-            Upload a semester intersection sheet, restore saved workspaces on refresh, search students fast, compare the paper form to the system registration, and export a conflict-ready Excel report.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
+    <main className="min-h-screen bg-canvas">
+      <header className="border-b border-line bg-white">
+        <div className="mx-auto flex max-w-[1500px] items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <div>
+            <h1 className="text-base font-bold text-ink">Student Registration Reconciliation</h1>
+            <p className="text-sm text-muted">Review paper forms against the system workbook</p>
+          </div>
           {!isHydrated ? (
-            <span className="rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 dark:bg-slate-800/80 dark:text-slate-100">
-              Restoring saved workspaces...
+            <span className="rounded-[10px] bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-600">
+              Restoring workspaces...
             </span>
           ) : null}
-          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         </div>
       </header>
 
+      <div className="mx-auto max-w-[1500px] px-4 pb-14 pt-6 sm:px-6 lg:px-8">
       <div className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
         <aside className="space-y-6">
           <ExcelUpload
@@ -472,26 +445,25 @@ function AppShell({ theme, onToggleTheme }) {
             persistenceError={persistenceError}
           />
 
-          <div className="glass-panel surface-ring rounded-[32px] p-5 sm:p-6">
+          <div className="card p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted">
               Workspace Snapshot
             </p>
-            <div className="mt-4 grid gap-3">
-              <div className="rounded-[24px] bg-white/70 p-4 dark:bg-slate-950/35">
-                <p className="text-sm text-muted">Students loaded</p>
-                <p className="mt-2 text-3xl font-bold text-ink">{workspaceSummary.totalStudents}</p>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-[10px] bg-slate-50 p-4">
+                <p className="text-sm text-muted">Students</p>
+                <p className="mt-1 text-2xl font-bold text-ink">{workspaceSummary.totalStudents}</p>
               </div>
-              <div className="rounded-[24px] bg-white/70 p-4 dark:bg-slate-950/35">
-                <p className="text-sm text-muted">Semester courses</p>
-                <p className="mt-2 text-3xl font-bold text-ink">{workspaceSummary.totalSubjects}</p>
+              <div className="rounded-[10px] bg-slate-50 p-4">
+                <p className="text-sm text-muted">Courses</p>
+                <p className="mt-1 text-2xl font-bold text-ink">{workspaceSummary.totalSubjects}</p>
               </div>
             </div>
-
-            <div className="mt-5">
+            <div className="mt-4">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
                 Course Preview
               </p>
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-2 flex flex-wrap gap-1.5">
                 {subjectPreview.length ? (
                   <>
                     {subjectPreview.slice(0, 8).map((subject) => (
@@ -500,14 +472,14 @@ function AppShell({ theme, onToggleTheme }) {
                       </span>
                     ))}
                     {subjectPreview.length > 8 ? (
-                      <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      <span className="rounded-[10px] bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
                         +{subjectPreview.length - 8} more
                       </span>
                     ) : null}
                   </>
                 ) : (
-                  <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                    Upload a workbook to preview course columns.
+                  <span className="rounded-[10px] bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                    Upload a workbook to preview courses.
                   </span>
                 )}
               </div>
@@ -537,21 +509,21 @@ function AppShell({ theme, onToggleTheme }) {
           />
 
           <div className="mb-6 grid gap-4 md:grid-cols-4">
-            <div className="glass-panel surface-ring rounded-[28px] p-5">
+            <div className="card p-4">
               <p className="text-sm text-muted">Matches</p>
-              <p className="mt-2 text-3xl font-bold text-ink">{workspaceSummary.matchCount}</p>
+              <p className="mt-1 text-2xl font-bold text-ink">{workspaceSummary.matchCount}</p>
             </div>
-            <div className="glass-panel surface-ring rounded-[28px] p-5">
+            <div className="card p-4">
               <p className="text-sm text-muted">Conflicts</p>
-              <p className="mt-2 text-3xl font-bold text-ink">{workspaceSummary.conflictCount}</p>
+              <p className="mt-1 text-2xl font-bold text-ink">{workspaceSummary.conflictCount}</p>
             </div>
-            <div className="glass-panel surface-ring rounded-[28px] p-5">
+            <div className="card p-4">
               <p className="text-sm text-muted">Pending review</p>
-              <p className="mt-2 text-3xl font-bold text-ink">{workspaceSummary.pendingCount}</p>
+              <p className="mt-1 text-2xl font-bold text-ink">{workspaceSummary.pendingCount}</p>
             </div>
-            <div className="glass-panel surface-ring rounded-[28px] p-5">
+            <div className="card p-4">
               <p className="text-sm text-muted">Workspaces saved</p>
-              <p className="mt-2 text-3xl font-bold text-ink">{workspaces.length}</p>
+              <p className="mt-1 text-2xl font-bold text-ink">{workspaces.length}</p>
             </div>
           </div>
 
@@ -602,34 +574,15 @@ function AppShell({ theme, onToggleTheme }) {
           </div>
         </section>
       </div>
+      </div>
     </main>
   );
 }
 
 export default function App() {
-  const [theme, setTheme] = useState('light');
-  const [hasResolvedTheme, setHasResolvedTheme] = useState(false);
-
-  useEffect(() => {
-    setTheme(getPreferredTheme());
-    setHasResolvedTheme(true);
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-
-    if (hasResolvedTheme) {
-      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    }
-  }, [hasResolvedTheme, theme]);
-
-  const handleToggleTheme = useCallback(() => {
-    setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'));
-  }, []);
-
   return (
     <WorkspaceProvider>
-      <AppShell theme={theme} onToggleTheme={handleToggleTheme} />
+      <AppShell />
     </WorkspaceProvider>
   );
 }

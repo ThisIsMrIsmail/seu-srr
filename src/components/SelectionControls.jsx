@@ -1,11 +1,11 @@
 function getStatusTone(status) {
   switch (status) {
     case 'Match':
-      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-200';
+      return 'bg-emerald-100 text-emerald-700';
     case 'Conflict':
-      return 'bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-200';
+      return 'bg-amber-100 text-amber-700';
     default:
-      return 'bg-slate-100 text-slate-700 dark:bg-slate-800/80 dark:text-slate-200';
+      return 'bg-slate-100 text-slate-600';
   }
 }
 
@@ -24,7 +24,7 @@ export default function SelectionControls({
   const status = reconciliation?.status ?? 'Pending';
 
   return (
-    <div className="glass-panel surface-ring flex flex-col gap-5 rounded-[30px] p-5">
+    <div className="card flex flex-col gap-5 p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted">
@@ -44,15 +44,15 @@ export default function SelectionControls({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-[24px] bg-white/70 p-4 dark:bg-slate-950/35">
+        <div className="rounded-[10px] bg-slate-50 p-4">
           <p className="text-sm text-muted">Reviewed</p>
           <p className="mt-2 text-2xl font-bold text-ink">{reviewedCount}</p>
         </div>
-        <div className="rounded-[24px] bg-white/70 p-4 dark:bg-slate-950/35">
+        <div className="rounded-[10px] bg-slate-50 p-4">
           <p className="text-sm text-muted">Conflicts</p>
           <p className="mt-2 text-2xl font-bold text-ink">{conflictCount}</p>
         </div>
-        <div className="rounded-[24px] bg-white/70 p-4 dark:bg-slate-950/35">
+        <div className="rounded-[10px] bg-slate-50 p-4">
           <p className="text-sm text-muted">Pending</p>
           <p className="mt-2 text-2xl font-bold text-ink">{pendingCount}</p>
         </div>
@@ -86,10 +86,10 @@ export default function SelectionControls({
       </div>
 
       <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-muted">
-        <span className="rounded-full border border-line px-3 py-2">Arrow Up / Down navigate list</span>
-        <span className="rounded-full border border-line px-3 py-2">Enter opens course checklist</span>
-        <span className="rounded-full border border-line px-3 py-2">Tab moves across courses</span>
-        <span className="rounded-full border border-line px-3 py-2">Space toggles the focused course</span>
+        <span className="rounded-[10px] border border-line px-3 py-2">Arrow Up / Down navigate list</span>
+        <span className="rounded-[10px] border border-line px-3 py-2">Enter opens course checklist</span>
+        <span className="rounded-[10px] border border-line px-3 py-2">Tab moves across courses</span>
+        <span className="rounded-[10px] border border-line px-3 py-2">Space toggles the focused course</span>
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ function HighlightedText({ text, query }) {
     part.toLowerCase() === lowerQuery ? (
       <mark
         key={`${part}-${index}`}
-        className="rounded-md bg-amber-200 px-1 text-slate-900 dark:bg-amber-300 dark:text-slate-950"
+          className="rounded bg-amber-200 px-1 text-slate-900"
       >
         {part}
       </mark>
@@ -32,17 +32,17 @@ function HighlightedText({ text, query }) {
 function getStatusTone(status) {
   switch (status) {
     case 'Match':
-      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-200';
+      return 'bg-emerald-100 text-emerald-700';
     case 'Conflict':
-      return 'bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-200';
+      return 'bg-amber-100 text-amber-700';
     default:
-      return 'bg-slate-100 text-slate-700 dark:bg-slate-800/80 dark:text-slate-200';
+      return 'bg-slate-100 text-slate-600';
   }
 }
 
 function SkeletonRow() {
   return (
-    <div className="glass-panel rounded-[28px] p-4">
+    <div className="card p-4">
       <div className="skeleton-shimmer h-4 w-24 rounded-full" />
       <div className="mt-3 skeleton-shimmer h-6 w-40 rounded-2xl" />
       <div className="mt-4 skeleton-shimmer h-12 rounded-3xl" />
@@ -73,7 +73,7 @@ export default function StudentList({
 
   if (!hasDataset) {
     return (
-      <div className="glass-panel surface-ring rounded-[32px] p-10 text-center">
+      <div className="card p-10 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted">No workspace yet</p>
         <h2 className="mt-3 text-2xl font-bold text-ink">Upload a semester workbook to begin</h2>
         <p className="mt-3 text-base leading-7 text-muted">
@@ -85,7 +85,7 @@ export default function StudentList({
 
   if (!students.length) {
     return (
-      <div className="glass-panel surface-ring rounded-[32px] p-10 text-center">
+      <div className="card p-10 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted">No matches</p>
         <h2 className="mt-3 text-2xl font-bold text-ink">No students match the current search</h2>
         <p className="mt-3 text-base leading-7 text-muted">
@@ -96,7 +96,7 @@ export default function StudentList({
   }
 
   return (
-    <div className="glass-panel surface-ring overflow-hidden rounded-[32px] p-4 sm:p-5">
+    <div className="card overflow-hidden p-4 sm:p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted">
@@ -104,7 +104,7 @@ export default function StudentList({
           </p>
           <h2 className="mt-2 text-2xl font-bold text-ink">Review students quickly</h2>
         </div>
-        <span className="rounded-full bg-accentSoft px-3 py-1 text-xs font-semibold text-accent">
+        <span className="rounded-[10px] bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
           {students.length} in view
         </span>
       </div>
@@ -123,12 +123,12 @@ export default function StudentList({
               onFocus={() => onHighlightStudent(student.rowId)}
               onMouseEnter={() => onHighlightStudent(student.rowId)}
               className={[
-                'w-full rounded-[26px] border px-4 py-4 text-left transition duration-200',
+                'w-full rounded-[10px] border px-4 py-4 text-left transition duration-150',
                 isActive
-                  ? 'border-accent bg-accentSoft/70 shadow-float'
+                  ? 'border-teal-300 bg-teal-50'
                   : isHighlighted
-                    ? 'border-slate-300 bg-white/90 dark:border-slate-600 dark:bg-slate-900/50'
-                    : 'border-line bg-white/70 hover:bg-white/90 dark:bg-slate-950/35 dark:hover:bg-slate-950/45',
+                    ? 'border-slate-300 bg-white'
+                    : 'border-line bg-white hover:bg-slate-50',
               ].join(' ')}
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -160,16 +160,16 @@ export default function StudentList({
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-muted">
-                <span className="rounded-full bg-white/85 px-3 py-1 dark:bg-slate-900/70">
+                <span className="rounded-[10px] bg-slate-100 px-3 py-1">
                   {reconciliation?.systemCourses.length ?? 0} in system
                 </span>
-                <span className="rounded-full bg-white/85 px-3 py-1 dark:bg-slate-900/70">
+                <span className="rounded-[10px] bg-slate-100 px-3 py-1">
                   {reconciliation?.manualCourses.length ?? 0} on paper
                 </span>
-                <span className="rounded-full bg-white/85 px-3 py-1 dark:bg-slate-900/70">
+                <span className="rounded-[10px] bg-slate-100 px-3 py-1">
                   {reconciliation?.missingInSystem.length ?? 0} paper-only
                 </span>
-                <span className="rounded-full bg-white/85 px-3 py-1 dark:bg-slate-900/70">
+                <span className="rounded-[10px] bg-slate-100 px-3 py-1">
                   {reconciliation?.missingOnPaper.length ?? 0} system-only
                 </span>
               </div>

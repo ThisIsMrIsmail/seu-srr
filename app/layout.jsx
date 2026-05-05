@@ -1,3 +1,5 @@
+import AppHeader from '@/src/components/AppHeader';
+import AppProviders from '@/src/components/AppProviders';
 import './globals.css';
 
 export const metadata = {
@@ -8,8 +10,13 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>{children}</body>
+    <html lang="en">
+      <body>
+        <AppProviders>
+          <AppHeader />
+          {children}
+        </AppProviders>
+      </body>
     </html>
   );
 }
