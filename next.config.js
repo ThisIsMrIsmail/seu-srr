@@ -4,6 +4,8 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['xlsx'],
   },
+  // Prevent Next.js from trying to bundle server-only packages into client chunks
+  serverExternalPackages: ['mysql2', 'bcryptjs'],
 };
 
 export default nextConfig;

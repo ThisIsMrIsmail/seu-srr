@@ -143,6 +143,8 @@ export default function WorkspacePage() {
     try {
       await new Promise((resolve) => requestAnimationFrame(resolve));
       exportReconciliationReport(workspace);
+      // Log the export action (fire-and-forget)
+      fetch(`/api/workspaces/${workspace.id}/export`, { method: 'POST' }).catch(() => {});
     } finally {
       setIsExporting(false);
     }

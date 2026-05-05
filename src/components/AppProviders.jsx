@@ -1,7 +1,12 @@
 'use client';
 
+import { AuthProvider } from '../context/AuthContext';
 import { WorkspaceProvider } from '../context/WorkspaceContext';
 
 export default function AppProviders({ children }) {
-  return <WorkspaceProvider>{children}</WorkspaceProvider>;
+  return (
+    <AuthProvider>
+      <WorkspaceProvider>{children}</WorkspaceProvider>
+    </AuthProvider>
+  );
 }

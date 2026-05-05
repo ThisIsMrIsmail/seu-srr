@@ -1,8 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useReducer, useState } from 'react';
-
-const STORAGE_KEY = 'student-reconciliation-workspaces';
+import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 
 const WorkspaceContext = createContext(null);
 
@@ -74,31 +72,6 @@ function coerceWorkspace(workspace) {
   };
 }
 
-function hydrateState(rawState) {
-  if (!rawState) {
-    return initialState;
-  }
-
-  try {
-    const parsedState = JSON.parse(rawState);
-    const workspaces = sortWorkspaces(
-      Array.isArray(parsedState?.workspaces) ? parsedState.workspaces.map(coerceWorkspace) : [],
-    );
-    const activeWorkspaceId = workspaces.some(
-      (workspace) => workspace.id === parsedState?.activeWorkspaceId,
-    )
-      ? parsedState.activeWorkspaceId
-      : workspaces[0]?.id ?? null;
-
-    return {
-      activeWorkspaceId,
-      workspaces,
-    };
-  } catch {
-    return initialState;
-  }
-}
-
 function touchWorkspace(workspace, updates) {
   return {
     ...workspace,
@@ -114,7 +87,6 @@ function updateWorkspace(state, workspaceId, updater, shouldSort = true) {
     if (workspace.id !== workspaceId) {
       return workspace;
     }
-
     hasChanged = true;
     return updater(workspace);
   });
@@ -154,7 +126,9 @@ function workspaceReducer(state, action) {
       return action.payload;
 
     case 'CREATE_WORKSPACE': {
-      const workspace = createWorkspaceFromUpload(action.payload, state.workspaces);
+      // payload is a pre-built workspace object so the same ID is shared
+      // between the optimistic update and the API request.
+      const workspace = coerceWorkspace(action.payload);
 
       return {
         activeWorkspaceId: workspace.id,
@@ -186,10 +160,7 @@ function workspaceReducer(state, action) {
       return updateWorkspace(
         state,
         action.payload.workspaceId,
-        (workspace) => ({
-          ...workspace,
-          searchQuery: action.payload.query,
-        }),
+        (workspace) => ({ ...workspace, searchQuery: action.payload.query }),
         false,
       );
 
@@ -197,10 +168,7 @@ function workspaceReducer(state, action) {
       return updateWorkspace(
         state,
         action.payload.workspaceId,
-        (workspace) => ({
-          ...workspace,
-          selectedStudentRowId: action.payload.rowId,
-        }),
+        (workspace) => ({ ...workspace, selectedStudentRowId: action.payload.rowId }),
         false,
       );
 
@@ -212,9 +180,7 @@ function workspaceReducer(state, action) {
           lastEditedAt: null,
         };
         const selectedCourseKeys = currentSelection.selectedCourseKeys.includes(action.payload.courseKey)
-          ? currentSelection.selectedCourseKeys.filter(
-              (courseKey) => courseKey !== action.payload.courseKey,
-            )
+          ? currentSelection.selectedCourseKeys.filter((k) => k !== action.payload.courseKey)
           : [...currentSelection.selectedCourseKeys, action.payload.courseKey];
 
         return touchWorkspace(workspace, {
@@ -256,9 +222,7 @@ function workspaceReducer(state, action) {
         const nextManualSelections = { ...workspace.manualSelections };
         delete nextManualSelections[action.payload.rowId];
 
-        return touchWorkspace(workspace, {
-          manualSelections: nextManualSelections,
-        });
+        return touchWorkspace(workspace, { manualSelections: nextManualSelections });
       });
 
     default:
@@ -271,71 +235,133 @@ export function WorkspaceProvider({ children }) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [persistenceError, setPersistenceError] = useState('');
 
+  // Stable ref so memoized actions can always read the latest state.
+  const stateRef = useRef(state);
   useEffect(() => {
-    const nextState = hydrateState(window.localStorage.getItem(STORAGE_KEY));
-    dispatch({ type: 'HYDRATE', payload: nextState });
-    setIsHydrated(true);
+    stateRef.current = state;
+  }, [state]);
 
-    const handleStorage = (event) => {
-      if (event.key !== STORAGE_KEY) {
-        return;
-      }
-
-      dispatch({ type: 'HYDRATE', payload: hydrateState(event.newValue) });
-    };
-
-    window.addEventListener('storage', handleStorage);
-
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-    };
+  // Load workspaces from the database on mount.
+  useEffect(() => {
+    fetch('/api/workspaces')
+      .then(async (res) => {
+        if (res.status === 401) return { workspaces: [] };
+        if (!res.ok) throw new Error('Failed to fetch workspaces');
+        return res.json();
+      })
+      .then(({ workspaces }) => {
+        const sorted = sortWorkspaces((workspaces ?? []).map(coerceWorkspace));
+        dispatch({
+          type: 'HYDRATE',
+          payload: { workspaces: sorted, activeWorkspaceId: sorted[0]?.id ?? null },
+        });
+      })
+      .catch(() => {
+        // Non-fatal: start with an empty workspace list
+      })
+      .finally(() => setIsHydrated(true));
   }, []);
-
-  useEffect(() => {
-    if (!isHydrated) {
-      return;
-    }
-
-    const timeoutId = setTimeout(() => {
-      try {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        setPersistenceError('');
-      } catch {
-        setPersistenceError('Unable to persist workspaces in local storage for this browser.');
-      }
-    }, 400);
-
-    return () => clearTimeout(timeoutId);
-  }, [isHydrated, state]);
 
   const actions = useMemo(
     () => ({
       createWorkspace(payload) {
-        dispatch({ type: 'CREATE_WORKSPACE', payload });
+        // Build once so the same ID is used in both the reducer and the API.
+        const newWorkspace = createWorkspaceFromUpload(payload, stateRef.current.workspaces);
+
+        dispatch({ type: 'CREATE_WORKSPACE', payload: newWorkspace });
+
+        fetch('/api/workspaces', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id:             newWorkspace.id,
+            name:           newWorkspace.name,
+            fileName:       newWorkspace.fileName,
+            students:       newWorkspace.students,
+            subjectColumns: newWorkspace.subjectColumns,
+            exportColumns:  newWorkspace.exportColumns,
+            headerRows:     newWorkspace.headerRows,
+          }),
+        }).catch(() =>
+          setPersistenceError('Workspace created locally but could not be saved to the database.'),
+        );
       },
+
       setActiveWorkspace(workspaceId) {
         dispatch({ type: 'SET_ACTIVE_WORKSPACE', payload: { workspaceId } });
       },
+
       removeWorkspace(workspaceId) {
         dispatch({ type: 'REMOVE_WORKSPACE', payload: { workspaceId } });
+        fetch(`/api/workspaces/${workspaceId}`, { method: 'DELETE' }).catch(() =>
+          setPersistenceError('Failed to delete workspace from the database.'),
+        );
       },
+
       setSearchQuery(workspaceId, query) {
         dispatch({ type: 'SET_SEARCH_QUERY', payload: { workspaceId, query } });
       },
+
       setSelectedStudent(workspaceId, rowId) {
         dispatch({ type: 'SET_SELECTED_STUDENT', payload: { workspaceId, rowId } });
       },
+
       toggleManualCourse(workspaceId, rowId, courseKey) {
-        dispatch({
-          type: 'TOGGLE_MANUAL_COURSE',
-          payload: { workspaceId, rowId, courseKey },
-        });
+        const workspace = stateRef.current.workspaces.find((w) => w.id === workspaceId);
+        const currentSel = workspace?.manualSelections?.[rowId] ?? {
+          selectedCourseKeys: [],
+          reviewedAt: null,
+          lastEditedAt: null,
+        };
+        const newKeys = currentSel.selectedCourseKeys.includes(courseKey)
+          ? currentSel.selectedCourseKeys.filter((k) => k !== courseKey)
+          : [...currentSel.selectedCourseKeys, courseKey];
+        const now = new Date().toISOString();
+
+        dispatch({ type: 'TOGGLE_MANUAL_COURSE', payload: { workspaceId, rowId, courseKey } });
+
+        fetch(`/api/workspaces/${workspaceId}/manual-selections`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rowId,
+            selectedCourseKeys: newKeys,
+            reviewedAt:         currentSel.reviewedAt,
+            lastEditedAt:       now,
+          }),
+        }).catch(() => setPersistenceError('Failed to save course selection.'));
       },
+
       saveStudentReview(workspaceId, rowId) {
+        const workspace = stateRef.current.workspaces.find((w) => w.id === workspaceId);
+        const currentSel = workspace?.manualSelections?.[rowId] ?? {
+          selectedCourseKeys: [],
+          reviewedAt: null,
+          lastEditedAt: null,
+        };
+        const now = new Date().toISOString();
+
         dispatch({ type: 'SAVE_STUDENT_REVIEW', payload: { workspaceId, rowId } });
+
+        fetch(`/api/workspaces/${workspaceId}/manual-selections`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rowId,
+            selectedCourseKeys: currentSel.selectedCourseKeys,
+            reviewedAt:         now,
+            lastEditedAt:       now,
+          }),
+        }).catch(() => setPersistenceError('Failed to save student review.'));
       },
+
       resetStudentReview(workspaceId, rowId) {
         dispatch({ type: 'RESET_STUDENT_REVIEW', payload: { workspaceId, rowId } });
+
+        fetch(
+          `/api/workspaces/${workspaceId}/manual-selections?rowId=${encodeURIComponent(rowId)}`,
+          { method: 'DELETE' },
+        ).catch(() => setPersistenceError('Failed to reset student review.'));
       },
     }),
     [],
