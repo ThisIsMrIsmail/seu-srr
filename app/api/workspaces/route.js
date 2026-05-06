@@ -45,13 +45,13 @@ export async function GET(request) {
   const workspaceIds = workspaceRows.map((w) => w.id);
 
   const [selectionRows] = await pool.query(
-    `SELECT workspace_id, row_id, selected_course_keys, reviewed_at, last_edited_at
+    `SELECT workspace_id, row_id, selected_course_keys, reviewed_at
      FROM manual_selections
      WHERE workspace_id IN (?)`,
     [workspaceIds],
   );
 
-  // Group selections by workspace_id
+  // Group selections by workspace_id (only need reviewedAt + keys for summary)
   const selectionsByWorkspace = {};
   for (const sel of selectionRows) {
     if (!selectionsByWorkspace[sel.workspace_id]) {
@@ -59,26 +59,53 @@ export async function GET(request) {
     }
     selectionsByWorkspace[sel.workspace_id][sel.row_id] = {
       selectedCourseKeys: parseJsonSafe(sel.selected_course_keys, []),
-      reviewedAt:   sel.reviewed_at ? new Date(sel.reviewed_at).toISOString() : null,
-      lastEditedAt: sel.last_edited_at ? new Date(sel.last_edited_at).toISOString() : null,
+      reviewedAt: sel.reviewed_at ? new Date(sel.reviewed_at).toISOString() : null,
     };
   }
 
-  const workspaces = workspaceRows.map((w) => ({
-    id:                  w.id,
-    name:                w.name,
-    fileName:            w.file_name,
-    students:            parseJsonSafe(w.students, []),
-    subjectColumns:      parseJsonSafe(w.subject_columns, []),
-    exportColumns:       parseJsonSafe(w.export_columns, []),
-    headerRows:          parseJsonSafe(w.header_rows, []),
-    manualSelections:    selectionsByWorkspace[w.id] ?? {},
-    searchQuery:         '',
-    selectedStudentRowId: null,
-    createdByUsername:   w.created_by_username ?? null,
-    createdAt:           new Date(w.created_at).toISOString(),
-    updatedAt:           new Date(w.updated_at).toISOString(),
-  }));
+  // Build shallow workspaces: metadata + server-computed summary only.
+  // The large students/headerRows/exportColumns arrays are NOT sent to the
+  // client; they are loaded on-demand when a workspace is actually opened.
+  const workspaces = workspaceRows.map((w) => {
+    const students     = parseJsonSafe(w.students, []);
+    const subjectCols  = parseJsonSafe(w.subject_columns, []);
+    const selMap       = selectionsByWorkspace[w.id] ?? {};
+
+    let reviewedCount = 0, matchCount = 0, conflictCount = 0;
+    for (const student of students) {
+      const sel = selMap[student.rowId];
+      if (!sel?.reviewedAt) continue;
+      reviewedCount++;
+      const systemKeySet = new Set(
+        subjectCols.filter((s) => student.subjectFlags?.[s.key] === 1).map((s) => s.key),
+      );
+      const manualKeys   = sel.selectedCourseKeys ?? [];
+      const manualKeySet = new Set(manualKeys);
+      const hasConflict  =
+        manualKeySet.size !== systemKeySet.size ||
+        manualKeys.some((k) => !systemKeySet.has(k));
+      if (hasConflict) conflictCount++;
+      else matchCount++;
+    }
+
+    return {
+      id:               w.id,
+      name:             w.name,
+      fileName:         w.file_name,
+      isShallow:        true,
+      summary: {
+        totalStudents: students.length,
+        totalSubjects: subjectCols.length,
+        reviewedCount,
+        matchCount,
+        conflictCount,
+        pendingCount: students.length - reviewedCount,
+      },
+      createdByUsername: w.created_by_username ?? null,
+      createdAt:         new Date(w.created_at).toISOString(),
+      updatedAt:         new Date(w.updated_at).toISOString(),
+    };
+  });
 
   return NextResponse.json({ workspaces });
 }

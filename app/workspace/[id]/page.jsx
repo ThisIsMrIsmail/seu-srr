@@ -38,10 +38,27 @@ export default function WorkspacePage() {
     if (id) actions.setActiveWorkspace(id);
   }, [id, actions]);
 
+  // If the workspace is a shallow list entry (students not yet loaded),
+  // fetch the full data from the detail endpoint.
+  useEffect(() => {
+    if (workspace?.isShallow) {
+      actions.loadWorkspace(id);
+    }
+  }, [workspace?.isShallow, id, actions]);
+
   // Redirect to home if workspace not found after hydration
   useEffect(() => {
     if (isHydrated && !workspace) router.replace('/');
   }, [isHydrated, workspace, router]);
+
+  // Show a loading skeleton while the full workspace data is being fetched.
+  if (!isHydrated || workspace?.isShallow) {
+    return (
+      <main className="mx-auto max-w-[1500px] px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+        <div className="card p-8 text-center text-sm text-muted">Loading workspace…</div>
+      </main>
+    );
+  }
 
   const debouncedQuery = useDebouncedValue(
     workspace?.searchQuery ?? '',

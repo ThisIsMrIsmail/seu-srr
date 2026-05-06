@@ -35,7 +35,15 @@ export default function HomePage() {
   }, [isParsing, error, workspaces, router]);
 
   const workspaceSummaries = useMemo(
-    () => Object.fromEntries(workspaces.map((w) => [w.id, buildWorkspaceSummary(w)])),
+    () =>
+      Object.fromEntries(
+        workspaces.map((w) => [
+          w.id,
+          // Shallow workspaces have a server-computed summary; fully-loaded
+          // workspaces compute it client-side from the student array.
+          w.isShallow && w.summary ? w.summary : buildWorkspaceSummary(w),
+        ]),
+      ),
     [workspaces],
   );
 

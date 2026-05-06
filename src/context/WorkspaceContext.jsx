@@ -58,6 +58,8 @@ function coerceWorkspace(workspace) {
     id: String(workspace?.id ?? createWorkspaceId()),
     name: String(workspace?.name || 'Saved Workspace').trim() || 'Saved Workspace',
     fileName: String(workspace?.fileName || ''),
+    isShallow: workspace?.isShallow ?? false,
+    summary: workspace?.summary ?? null,
     students,
     exportColumns: Array.isArray(workspace?.exportColumns) ? workspace.exportColumns : [],
     headerRows: Array.isArray(workspace?.headerRows) ? workspace.headerRows : [],
@@ -226,6 +228,21 @@ function workspaceReducer(state, action) {
         return touchWorkspace(workspace, { manualSelections: nextManualSelections });
       });
 
+    case 'MERGE_WORKSPACE':
+      // Replace shallow workspace data with fully-loaded data while
+      // preserving transient UI state (search query, selected student).
+      return updateWorkspace(
+        state,
+        action.payload.id,
+        (ws) => ({
+          ...action.payload,
+          isShallow: false,
+          searchQuery: ws.searchQuery,
+          selectedStudentRowId: ws.selectedStudentRowId,
+        }),
+        false,
+      );
+
     default:
       return state;
   }
@@ -378,6 +395,23 @@ export function WorkspaceProvider({ children }) {
           `/api/workspaces/${workspaceId}/manual-selections?rowId=${encodeURIComponent(rowId)}`,
           { method: 'DELETE' },
         ).catch(() => setPersistenceError('Failed to reset student review.'));
+      },
+
+      async loadWorkspace(workspaceId) {
+        const ws = stateRef.current.workspaces.find((w) => w.id === workspaceId);
+        // Skip if already fully loaded (not shallow) or doesn't exist.
+        if (!ws?.isShallow) return;
+
+        try {
+          const res = await fetch(`/api/workspaces/${workspaceId}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data.workspace) {
+            dispatch({ type: 'MERGE_WORKSPACE', payload: coerceWorkspace(data.workspace) });
+          }
+        } catch {
+          // Silent fail — workspace page handles the empty state
+        }
       },
     }),
     [],
