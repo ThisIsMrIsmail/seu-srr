@@ -51,15 +51,6 @@ export default function WorkspacePage() {
     if (isHydrated && !workspace) router.replace('/');
   }, [isHydrated, workspace, router]);
 
-  // Show a loading skeleton while the full workspace data is being fetched.
-  if (!isHydrated || workspace?.isShallow) {
-    return (
-      <main className="mx-auto max-w-[1500px] px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-        <div className="card p-8 text-center text-sm text-muted">Loading workspace…</div>
-      </main>
-    );
-  }
-
   const debouncedQuery = useDebouncedValue(
     workspace?.searchQuery ?? '',
     250,
@@ -179,7 +170,7 @@ export default function WorkspacePage() {
     }
   }, [workspace]);
 
-  if (!isHydrated || !workspace) {
+  if (!isHydrated || workspace?.isShallow || !workspace) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <p className="text-sm text-muted">Loading workspace...</p>

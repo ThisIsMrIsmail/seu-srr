@@ -59,15 +59,6 @@ export default function StudentDetailPage() {
     else if (isHydrated && !workspace?.isShallow && workspace && !student) router.replace(`/workspace/${id}`);
   }, [isHydrated, workspace, student, id, router]);
 
-  // Show loading while workspace data is being fetched.
-  if (!isHydrated || workspace?.isShallow) {
-    return (
-      <main className="mx-auto max-w-[1500px] px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-        <div className="card p-8 text-center text-sm text-muted">Loading student…</div>
-      </main>
-    );
-  }
-
   const reconciliation = useMemo(() => {
     if (!workspace || !student) return null;
     return buildStudentReconciliation(
@@ -160,7 +151,7 @@ export default function StudentDetailPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSave, student]);
 
-  if (!isHydrated || !workspace || !student) {
+  if (!isHydrated || workspace?.isShallow || !workspace || !student) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <p className="text-sm text-muted">Loading student...</p>
