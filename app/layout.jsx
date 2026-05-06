@@ -3,7 +3,7 @@ import AppProviders from '@/src/components/AppProviders';
 import './globals.css';
 
 export const metadata = {
-  title: 'Student Registration Reconciliation',
+  title: 'SEU SRR',
   description:
     'Compare semester intersection workbooks against paper registration forms and export a reconciliation report.',
 };
