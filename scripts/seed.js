@@ -19,7 +19,7 @@ process.loadEnvFile(resolve(__dirname, '../.env'));
 
 const DEFAULT_USERNAME = 'thisismrismail';
 const DEFAULT_EMAIL    = 'ismail.sherif@seu.edu.eg';
-const DEFAULT_PASSWORD = 'mainadmin';
+const DEFAULT_PASSWORD = 'adminadmin';
 
 async function main() {
   const connection = await createConnection({
