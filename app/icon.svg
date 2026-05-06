@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Background rounded square -->
+  <rect width="32" height="32" rx="7" fill="#0f766e"/>
+  <!-- Graduation cap body (mortarboard) -->
+  <polygon points="16,7 28,12.5 16,18 4,12.5" fill="#ffffff"/>
+  <!-- Cap top highlight -->
+  <polygon points="16,7 28,12.5 16,18 4,12.5" fill="none" stroke="#99f6e4" stroke-width="0.5"/>
+  <!-- Left tassel string -->
+  <line x1="4" y1="12.5" x2="4" y2="19" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="4" cy="20" r="1.2" fill="#ffffff"/>
+  <!-- Cap rim (the part that drops down) -->
+  <path d="M10 15.2 L10 20.5 Q16 23.5 22 20.5 L22 15.2" fill="#ccfbf1" opacity="0.85"/>
+  <!-- Checkmark overlay (bottom-right) -->
+  <circle cx="23" cy="23" r="6.5" fill="#0f766e" stroke="#ffffff" stroke-width="1.2"/>
+  <polyline points="19.5,23 22,25.5 26.5,20.5" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

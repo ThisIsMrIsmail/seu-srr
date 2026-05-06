@@ -30,7 +30,7 @@ export default function AppHeader() {
           href="/"
           className="text-sm font-bold text-ink transition-colors hover:text-teal-700"
         >
-          Reconciliation
+          SEU SRR
         </Link>
 
         {workspace ? (
