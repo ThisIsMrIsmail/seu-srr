@@ -45,10 +45,9 @@ export default function LoginForm() {
 
       const next = searchParams.get('next');
       const destination = next && next.startsWith('/') ? next : '/';
-      // Refresh the router cache so the new session cookie is picked up,
-      // then navigate to the destination.
-      router.refresh();
-      router.push(destination);
+      // Hard navigation ensures the browser sends the new session cookie
+      // with the next request and bypasses any cached route redirects.
+      window.location.href = destination;
     } catch {
       setError('Unable to reach the server. Please try again.');
     } finally {

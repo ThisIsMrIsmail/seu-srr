@@ -15,8 +15,8 @@ export default {
         successSoft: 'var(--color-success-soft)',
       },
       fontFamily: {
-        sans: ['Inter', 'Segoe UI', 'sans-serif'],
-        arabic: ['IBM Plex Sans Arabic', 'Segoe UI', 'sans-serif'],
+        sans: ['var(--font-inter)', 'Segoe UI', 'sans-serif'],
+        arabic: ['var(--font-ibm-plex-arabic)', 'Segoe UI', 'sans-serif'],
       },
     },
   },

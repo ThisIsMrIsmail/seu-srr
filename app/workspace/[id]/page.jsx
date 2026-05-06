@@ -38,6 +38,14 @@ export default function WorkspacePage() {
     if (id) actions.setActiveWorkspace(id);
   }, [id, actions]);
 
+  // If the workspace is a shallow list entry (students not yet loaded),
+  // fetch the full data from the detail endpoint.
+  useEffect(() => {
+    if (workspace?.isShallow) {
+      actions.loadWorkspace(id);
+    }
+  }, [workspace?.isShallow, id, actions]);
+
   // Redirect to home if workspace not found after hydration
   useEffect(() => {
     if (isHydrated && !workspace) router.replace('/');
@@ -162,7 +170,7 @@ export default function WorkspacePage() {
     }
   }, [workspace]);
 
-  if (!isHydrated || !workspace) {
+  if (!isHydrated || workspace?.isShallow || !workspace) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <p className="text-sm text-muted">Loading workspace...</p>

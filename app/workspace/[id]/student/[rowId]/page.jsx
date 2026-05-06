@@ -21,6 +21,13 @@ export default function StudentDetailPage() {
     [workspaces, id],
   );
 
+  // If the workspace is shallow, trigger a full load.
+  useEffect(() => {
+    if (workspace?.isShallow) {
+      actions.loadWorkspace(id);
+    }
+  }, [workspace?.isShallow, id, actions]);
+
   const student = useMemo(
     () => workspace?.students.find((s) => s.rowId === rowId) ?? null,
     [workspace, rowId],
@@ -48,8 +55,8 @@ export default function StudentDetailPage() {
 
   // Redirect if not found after hydration
   useEffect(() => {
-    if (isHydrated && !workspace) router.replace('/');
-    else if (isHydrated && workspace && !student) router.replace(`/workspace/${id}`);
+    if (isHydrated && !workspace?.isShallow && !workspace) router.replace('/');
+    else if (isHydrated && !workspace?.isShallow && workspace && !student) router.replace(`/workspace/${id}`);
   }, [isHydrated, workspace, student, id, router]);
 
   const reconciliation = useMemo(() => {
@@ -144,7 +151,7 @@ export default function StudentDetailPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSave, student]);
 
-  if (!isHydrated || !workspace || !student) {
+  if (!isHydrated || workspace?.isShallow || !workspace || !student) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <p className="text-sm text-muted">Loading student...</p>
