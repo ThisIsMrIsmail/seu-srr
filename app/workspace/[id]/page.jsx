@@ -4,7 +4,7 @@ import SearchInput from '@/src/components/SearchInput';
 import StudentList from '@/src/components/StudentList';
 import { useWorkspaceContext } from '@/src/context/WorkspaceContext';
 import useDebouncedValue from '@/src/hooks/useDebouncedValue';
-import { exportReconciliationReport } from '@/src/utils/excel';
+import { exportOnPaperData, exportReconciliationReport } from '@/src/utils/excel';
 import { buildStudentReconciliation, buildWorkspaceSummary } from '@/src/utils/reconciliation';
 import { filterStudents } from '@/src/utils/students';
 import { useParams, useRouter } from 'next/navigation';
@@ -24,6 +24,7 @@ export default function WorkspacePage() {
   const router = useRouter();
   const { workspaces, actions, isHydrated } = useWorkspaceContext();
   const [isExporting, setIsExporting] = useState(false);
+  const [isExportingOnPaper, setIsExportingOnPaper] = useState(false);
   const [highlightedRowId, setHighlightedRowId] = useState(null);
   const searchInputRef = useRef(null);
 
@@ -150,6 +151,17 @@ export default function WorkspacePage() {
     }
   }, [workspace]);
 
+  const handleExportOnPaper = useCallback(async () => {
+    if (!workspace) return;
+    setIsExportingOnPaper(true);
+    try {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      exportOnPaperData(workspace);
+    } finally {
+      setIsExportingOnPaper(false);
+    }
+  }, [workspace]);
+
   if (!isHydrated || !workspace) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -168,14 +180,24 @@ export default function WorkspacePage() {
             <p className="mt-0.5 text-xs text-muted">{workspace.fileName}</p>
           ) : null}
         </div>
-        <button
-          type="button"
-          onClick={handleExport}
-          disabled={isExporting}
-          className="btn-secondary flex-shrink-0"
-        >
-          {isExporting ? 'Exporting...' : 'Export Report'}
-        </button>
+        <div className="flex flex-shrink-0 gap-2">
+          <button
+            type="button"
+            onClick={handleExportOnPaper}
+            disabled={isExportingOnPaper}
+            className="btn-secondary"
+          >
+            {isExportingOnPaper ? 'Exporting...' : 'Export On Paper'}
+          </button>
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={isExporting}
+            className="btn-secondary"
+          >
+            {isExporting ? 'Exporting...' : 'Export Report'}
+          </button>
+        </div>
       </div>
 
       {/* Stats bar */}
